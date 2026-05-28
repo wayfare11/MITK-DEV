@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LoginviewControls</class>
+ <widget class="QWidget" name="LoginviewControls">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>468</width>
+    <height>366</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QDialog
+{
+     background-image: url(:/images/login.png);
+}</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLineEdit" name="userNameLineEdit">
+     <property name="styleSheet">
+      <string notr="true">QLineEdit {
+	border: 1px solid #298DFF; /* QPushButton边框的宽度、样式和颜色 */
+	border-radius: 4px; /* 边框圆角 */
+	font-family: &quot;Microsoft YaHei&quot;; /* 文本字体族 */
+	font-size: 10pt; /* 文本字体大小 */
+    qproperty-alignment: AlignHCenter;
+}</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="passwordLineEdit">
+     <property name="styleSheet">
+      <string notr="true">QLineEdit {
+	border: 1px solid #298DFF; /* QPushButton边框的宽度、样式和颜色 */
+	border-radius: 4px; /* 边框圆角 */
+	font-family: &quot;Microsoft YaHei&quot;; /* 文本字体族 */
+	font-size: 10pt; /* 文本字体大小 */
+    qproperty-alignment: AlignHCenter;
+}</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="loginBtn">
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+	border: 1px solid #298DFF; /* QPushButton边框的宽度、样式和颜色 */
+	border-radius: 10px; /* 边框圆角 */
+	background-color: #F2F2F2; /* 背景颜色 */
+	color: #ffffff; /* 文本颜色 */
+	background-color: rgb(2, 137, 185);
+	font-family: &quot;Microsoft YaHei&quot;; /* 文本字体族 */
+	font-size: 14pt; /* 文本字体大小 */
+   qproperty-alignment: AlignHCenter;
+}</string>
+     </property>
+     <property name="text">
+      <string>登 录</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

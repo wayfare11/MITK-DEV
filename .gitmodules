@@ -1,0 +1,3 @@
+[submodule "mitk-2016-0528/MITK"]
+	path = mitk-2016-0528/MITK
+	url = https://github.com/MITK/MITK.git
