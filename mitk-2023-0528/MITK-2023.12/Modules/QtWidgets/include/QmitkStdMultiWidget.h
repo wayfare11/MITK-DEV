@@ -146,6 +146,8 @@ private:
   virtual void SetInteractionSchemeImpl() override { }
 
   void CreateRenderWindowWidgets();
+  void InitializeOwnViews(const mitk::TimeGeometry* geometry, bool resetCamera = true);
+  void InitializeOwnViewsByBoundingObjects();
 
   /**
   * @brief The 3 helper objects which contain the plane geometry.
@@ -167,6 +169,7 @@ private:
    * There is no node for widget 4, hence, we need an extra member.
    */
   mitk::Color m_DecorationColorWidget4;
+  QString m_RenderWindowGroup;
 
 };
 

@@ -22,6 +22,27 @@ found in the LICENSE file.
 #include <mitkNodePredicateDataType.h>
 #include <mitkTimeNavigationController.h>
 
+namespace
+{
+  bool Is2DRendererInSynchronizedScope(vtkRenderWindow* renderWindow, const mitk::BaseRenderer* sendingRenderer)
+  {
+    if (nullptr == sendingRenderer)
+    {
+      return false;
+    }
+
+    auto* renderer = mitk::BaseRenderer::GetInstance(renderWindow);
+    if (nullptr == renderer || renderer->GetMapperID() != mitk::BaseRenderer::Standard2D)
+    {
+      return false;
+    }
+
+    const auto& senderGroup = sendingRenderer->GetRenderWindowGroup();
+    const auto& rendererGroup = renderer->GetRenderWindowGroup();
+    return senderGroup.empty() ? rendererGroup.empty() : rendererGroup == senderGroup;
+  }
+}
+
 //////////////////////////////////////////////////////////////////////////
 // STANDARD FUNCTIONS
 //////////////////////////////////////////////////////////////////////////
@@ -200,7 +221,7 @@ mitk::StdFunctionCommand::ActionFunction mitk::DisplayActionEventFunctions::Move
       auto allRenderWindows = renderingManager->GetAllRegisteredRenderWindows();
       for (auto renderWindow : allRenderWindows)
       {
-        if (BaseRenderer::GetInstance(renderWindow)->GetMapperID() == BaseRenderer::Standard2D)
+        if (Is2DRendererInSynchronizedScope(renderWindow, sendingRenderer.GetPointer()))
         {
           BaseRenderer::GetInstance(renderWindow)->GetCameraController()->MoveBy(displayActionEvent->GetMoveVector());
           renderingManager->RequestUpdate(renderWindow);
@@ -228,7 +249,7 @@ mitk::StdFunctionCommand::ActionFunction mitk::DisplayActionEventFunctions::SetC
       auto allRenderWindows = RenderingManager::GetInstance()->GetAllRegisteredRenderWindows();
       for (auto renderWindow : allRenderWindows)
       {
-        if (BaseRenderer::GetInstance(renderWindow)->GetMapperID() == BaseRenderer::Standard2D)
+        if (Is2DRendererInSynchronizedScope(renderWindow, sendingRenderer.GetPointer()))
         {
           BaseRenderer::GetInstance(renderWindow)->GetSliceNavigationController()->SelectSliceByPoint(displayActionEvent->GetPosition());
         }
@@ -258,7 +279,7 @@ mitk::StdFunctionCommand::ActionFunction mitk::DisplayActionEventFunctions::Zoom
         auto allRenderWindows = renderingManager->GetAllRegisteredRenderWindows();
         for (auto renderWindow : allRenderWindows)
         {
-          if (BaseRenderer::GetInstance(renderWindow)->GetMapperID() == BaseRenderer::Standard2D)
+          if (Is2DRendererInSynchronizedScope(renderWindow, sendingRenderer.GetPointer()))
           {
             BaseRenderer* currentRenderer = BaseRenderer::GetInstance(renderWindow);
             currentRenderer->GetCameraController()->Zoom(displayActionEvent->GetZoomFactor(), displayActionEvent->GetStartCoordinate());
@@ -288,7 +309,7 @@ mitk::StdFunctionCommand::ActionFunction mitk::DisplayActionEventFunctions::Scro
       auto allRenderWindows = RenderingManager::GetInstance()->GetAllRegisteredRenderWindows();
       for (auto renderWindow : allRenderWindows)
       {
-        if (BaseRenderer::GetInstance(renderWindow)->GetMapperID() == BaseRenderer::Standard2D)
+        if (Is2DRendererInSynchronizedScope(renderWindow, sendingRenderer.GetPointer()))
         {
           SliceNavigationController* sliceNavigationController = BaseRenderer::GetInstance(renderWindow)->GetSliceNavigationController();
           if (nullptr == sliceNavigationController)

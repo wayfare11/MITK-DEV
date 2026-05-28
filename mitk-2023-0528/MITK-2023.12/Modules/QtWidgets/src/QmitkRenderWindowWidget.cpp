@@ -190,10 +190,9 @@ void QmitkRenderWindowWidget::InitializeGUI()
     return;
   }
 
-  mitk::RenderingManager::GetInstance()->SetDataStorage(m_DataStorage);
-
   // create render window for this render window widget
   m_RenderWindow = new QmitkRenderWindow(this, m_WidgetName, nullptr);
+  m_RenderWindow->GetRenderer()->SetDataStorage(m_DataStorage);
   m_RenderWindow->SetLayoutIndex(mitk::AnatomicalPlane::Sagittal);
   connect(m_RenderWindow, &QmitkRenderWindow::ResetGeometry,
     this, &QmitkRenderWindowWidget::OnResetGeometry);

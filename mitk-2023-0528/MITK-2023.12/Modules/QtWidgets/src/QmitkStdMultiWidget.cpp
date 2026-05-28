@@ -49,6 +49,7 @@ QmitkStdMultiWidget::QmitkStdMultiWidget(QWidget *parent,
                                          const QString &name/* = "stdmulti"*/)
   : QmitkAbstractMultiWidget(parent, f, name)
 {
+  m_RenderWindowGroup = name + "." + QString::number(reinterpret_cast<quintptr>(this), 16);
 }
 
 QmitkStdMultiWidget::~QmitkStdMultiWidget()
@@ -144,8 +145,8 @@ void QmitkStdMultiWidget::InitializeViews(const mitk::TimeGeometry* geometry, bo
     }
   }
 
-  // initialize render windows
-  renderingManager->InitializeViews(geometry, mitk::RenderingManager::REQUEST_UPDATE_ALL, resetCamera);
+  // initialize only the render windows owned by this multi widget
+  InitializeOwnViews(geometry, resetCamera);
 
   if (!resetCamera)
   {
@@ -256,7 +257,7 @@ void QmitkStdMultiWidget::ResetCrosshair()
     return;
   }
 
-  mitk::RenderingManager::GetInstance()->InitializeViewsByBoundingObjects(dataStorage);
+  InitializeOwnViewsByBoundingObjects();
 
   SetWidgetPlaneMode(mitk::InteractionSchemeSwitcher::MITKStandard);
 }
@@ -623,7 +624,7 @@ void QmitkStdMultiWidget::SetWidgetPlanesVisibility(bool visible, mitk::BaseRend
   {
     m_PlaneNode3->SetVisibility(visible, renderer);
   }
-  mitk::RenderingManager::GetInstance()->RequestUpdateAll();
+  RequestUpdateAll();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -635,16 +636,47 @@ void QmitkStdMultiWidget::SetLayoutImpl()
   GetMultiWidgetLayoutManager()->SetLayoutDesign(QmitkMultiWidgetLayoutManager::LayoutDesign::DEFAULT);
 
   // Initialize views as axial, sagittal, coronal to all data objects in DataStorage
-  auto geo = GetDataStorage()->ComputeBoundingGeometry3D(GetDataStorage()->GetAll());
-  mitk::RenderingManager::GetInstance()->InitializeViews(geo);
+  auto dataStorage = GetDataStorage();
+  if (nullptr != dataStorage)
+  {
+    auto geo = dataStorage->ComputeBoundingGeometry3D(dataStorage->GetAll());
+    InitializeOwnViews(geo);
+  }
+}
+
+void QmitkStdMultiWidget::InitializeOwnViews(const mitk::TimeGeometry* geometry, bool resetCamera)
+{
+  auto* renderingManager = mitk::RenderingManager::GetInstance();
+  renderingManager->InitializeView(GetRenderWindow1()->renderWindow(), geometry, resetCamera);
+  renderingManager->InitializeView(GetRenderWindow2()->renderWindow(), geometry, resetCamera);
+  renderingManager->InitializeView(GetRenderWindow3()->renderWindow(), geometry, resetCamera);
+  renderingManager->InitializeView(GetRenderWindow4()->renderWindow(), geometry, resetCamera);
+}
+
+void QmitkStdMultiWidget::InitializeOwnViewsByBoundingObjects()
+{
+  auto dataStorage = GetDataStorage();
+  if (nullptr == dataStorage)
+  {
+    return;
+  }
+
+  auto* renderingManager = mitk::RenderingManager::GetInstance();
+  renderingManager->InitializeViewByBoundingObjects(GetRenderWindow1()->renderWindow(), dataStorage);
+  renderingManager->InitializeViewByBoundingObjects(GetRenderWindow2()->renderWindow(), dataStorage);
+  renderingManager->InitializeViewByBoundingObjects(GetRenderWindow3()->renderWindow(), dataStorage);
+  renderingManager->InitializeViewByBoundingObjects(GetRenderWindow4()->renderWindow(), dataStorage);
 }
 
 void QmitkStdMultiWidget::CreateRenderWindowWidgets()
 {
+  const auto renderWindowGroup = m_RenderWindowGroup.toStdString();
+
   // create axial render window (widget)
   QString renderWindowWidgetName = GetNameFromIndex(0, 0);
   RenderWindowWidgetPointer renderWindowWidget1 = std::make_shared<QmitkRenderWindowWidget>(this, renderWindowWidgetName, GetDataStorage());
   auto renderWindow1 = renderWindowWidget1->GetRenderWindow();
+  renderWindow1->GetRenderer()->SetRenderWindowGroup(renderWindowGroup);
   renderWindow1->GetSliceNavigationController()->SetDefaultViewDirection(mitk::AnatomicalPlane::Axial);
   renderWindowWidget1->SetDecorationColor(GetDecorationColor(0));
   renderWindowWidget1->SetCornerAnnotationText("Axial");
@@ -655,6 +687,7 @@ void QmitkStdMultiWidget::CreateRenderWindowWidgets()
   renderWindowWidgetName = GetNameFromIndex(0, 1);
   RenderWindowWidgetPointer renderWindowWidget2 = std::make_shared<QmitkRenderWindowWidget>(this, renderWindowWidgetName, GetDataStorage());
   auto renderWindow2 = renderWindowWidget2->GetRenderWindow();
+  renderWindow2->GetRenderer()->SetRenderWindowGroup(renderWindowGroup);
   renderWindow2->GetSliceNavigationController()->SetDefaultViewDirection(mitk::AnatomicalPlane::Sagittal);
   renderWindowWidget2->SetDecorationColor(GetDecorationColor(1));
   renderWindowWidget2->setStyleSheet("border: 0px");
@@ -666,6 +699,7 @@ void QmitkStdMultiWidget::CreateRenderWindowWidgets()
   renderWindowWidgetName = GetNameFromIndex(1, 0);
   RenderWindowWidgetPointer renderWindowWidget3 = std::make_shared<QmitkRenderWindowWidget>(this, renderWindowWidgetName, GetDataStorage());
   auto renderWindow3 = renderWindowWidget3->GetRenderWindow();
+  renderWindow3->GetRenderer()->SetRenderWindowGroup(renderWindowGroup);
   renderWindow3->GetSliceNavigationController()->SetDefaultViewDirection(mitk::AnatomicalPlane::Coronal);
   renderWindowWidget3->SetDecorationColor(GetDecorationColor(2));
   renderWindowWidget3->SetCornerAnnotationText("Coronal");
@@ -676,6 +710,7 @@ void QmitkStdMultiWidget::CreateRenderWindowWidgets()
   renderWindowWidgetName = GetNameFromIndex(1, 1);
   RenderWindowWidgetPointer renderWindowWidget4 = std::make_shared<QmitkRenderWindowWidget>(this, renderWindowWidgetName, GetDataStorage());
   auto renderWindow4 = renderWindowWidget4->GetRenderWindow();
+  renderWindow4->GetRenderer()->SetRenderWindowGroup(renderWindowGroup);
   renderWindow4->GetSliceNavigationController()->SetDefaultViewDirection(mitk::AnatomicalPlane::Original);
   renderWindowWidget4->SetDecorationColor(GetDecorationColor(3));
   renderWindowWidget4->SetCornerAnnotationText("3D");

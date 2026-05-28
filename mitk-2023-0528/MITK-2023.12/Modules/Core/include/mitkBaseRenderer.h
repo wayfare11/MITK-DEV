@@ -328,6 +328,16 @@ namespace mitk
       return m_Name.c_str();
     }
 
+    void SetRenderWindowGroup(const std::string& group)
+    {
+      m_RenderWindowGroup = group;
+    }
+
+    const std::string& GetRenderWindowGroup() const
+    {
+      return m_RenderWindowGroup;
+    }
+
     /**
      * \brief Return the size in x-direction of the base renderer.
      */
@@ -488,6 +498,7 @@ namespace mitk
     unsigned long m_CurrentWorldPlaneGeometryTransformTime;
 
     std::string m_Name;
+    std::string m_RenderWindowGroup;
 
     double m_Bounds[6];
 
